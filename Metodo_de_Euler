@@ -1,0 +1,67 @@
+clc
+clear all
+close all
+
+h = 0.125; % espacamento do tempo
+
+t = 0:h:30; % vetor tempo 
+
+n = length(t); %tamanho do vetor tempo
+
+v = zeros(n,1); % vetor solucao n é o numero de linhas e 1 é o numero de colunas
+x = zeros(n,1);
+y = zeros(n,1);
+z = zeros(n,1);
+
+
+
+a = 0.1; % taxa de infecção das células 
+b = 0.2; % taxa de crescimento da população de virions
+c = 0.3; %taxa de produção de células não infectadas
+d = 0.6; %taxa de morte por causas naturais
+beta = 0.5; %taxa de infecção
+e = 0.4; %taxa de morte devido a infecção
+f = d+e;
+alfa = 0.6; %taxa de contato entre células infectadas e linfócitos 
+l = 0.2; %taxa de morte dos linfócitos
+g = 0.5; %taxa de produção dos linfócitos
+
+
+
+% metodo de Euler
+% dy/dx = lambda*y
+% y_{n+1} = y_{n} + h*f(x_n,y_n)
+% y_{n+1} = y_{n} + h*lambda*y_{n}
+
+v(1,1) = 6; % condição inicial dos virions
+x(1,1) = 8; % condição inicial das células não infectadas
+y(1,1) = 4; % condição inicial das células infectadas
+z(1,1) = 0.3; %condição inicial dos linfócitos
+
+
+
+V = @(y,v) a*y - b*v;
+X = @(v,x) c - d*x - beta*x*v;
+Y = @(v,x,z,y) beta*x*v - f*y - alfa*y*z;
+Z = @(z) g - l*z;
+
+
+for i = 1:(n-1)
+  v(i+1,1) = v(i,1)+h*V(y(i,1),v(i,1)); % método de euler para os virions
+  x(i+1,1) = x(i,1) + h*X(v(i,1), x(i,1)); % método de euler para células-alvo não infectadas
+  y(i+1,1) = y(i,1) + h* Y(v(i,1), x(i,1), z(i,1),y(i,1)); % método de euler para células infectadas
+  z(i+1,1) = z(i,1) + h*Z(z(i,1));
+end
+
+
+
+figure
+hold on
+plot(t,v,'g') %plot da solucao numérica dos virions
+plot(t,x,'b') %plot da solucao numérica das células-alvo não infectadas
+plot(t,y, 'm') %plot da solução numérica das células infectadas
+plot(t,z, 'r') %plot da solução numérica dos linfócitos
+ylabel("Produção do organismo")
+xlabel("Tempo (dias)")
+
+hold off
